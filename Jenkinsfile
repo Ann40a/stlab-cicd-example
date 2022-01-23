@@ -1,16 +1,29 @@
 pipeline {
-  agent { docker { image 'golang:1.17.6-alpine' } }
+  agent any
   stages {
+    stage('Check golang version') {
+      steps {
+        bat 'go version > go-version.txt'
+      }
+    }
     stage('Test') {
       steps {
-        sh 'go clean -testcache'
-        sh 'go test ./...'
+        bat 'go clean -testcache'
+        bat 'go test ./...'
       }
     }
     stage('Build') {
       steps {
-        sh 'go build'
+        bat 'go build'
       }
+    }
+  }
+  post {
+    always {
+      archiveArtifacts 'go-version.txt'
+    }
+    success {
+      archiveArtifacts '*.exe'
     }
   }
 }
